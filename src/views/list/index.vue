@@ -90,7 +90,7 @@ const paginatedList = computed(() => {
 const getList = async () => {
   loading.value = true
   try {
-    const res: any = await request.get('/bookMarks/list')
+    const res: any = await request.get('/BookMarks/all')
     fullList.value = res.data?.records || res.data || res || []
     handleFilter()
   } catch (e) {
@@ -128,7 +128,7 @@ const handleCurrentChange = (val: number) => {
 const handleExport = async () => {
   try {
     ElMessage.info('准备导出书签，请稍后...')
-    const res: any = await request.get('/bookmarks/export/html', { responseType: 'blob' })
+    const res: any = await request.get('/BookMarks/export?format=html', { responseType: 'blob' })
     const url = window.URL.createObjectURL(new Blob([res.data || res]))
     const link = document.createElement('a')
     link.href = url

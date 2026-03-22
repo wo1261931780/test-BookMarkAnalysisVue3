@@ -72,14 +72,9 @@ const filterNode = (value: string, data: any) => {
 
 const fetchTreeData = async () => {
   try {
-    // Calling standard MybatisPlus list API. We assume /bookMarks/list or similar returns all
-    // Since we didn't specify the exact controller previously, let's use /bookMarks/list as widely typical.
-    const res: any = await request.get('/bookMarks/list')
+    const res: any = await request.get('/BookMarks/all')
     let list = res.data?.records || res.data || res || []
-    // Safety check
     if (!Array.isArray(list)) list = []
-    
-    // Convert array structure into hierarchical tree
     treeData.value = buildTree(list, null)
   } catch (error) {
     console.error('获取树状数据失败', error)

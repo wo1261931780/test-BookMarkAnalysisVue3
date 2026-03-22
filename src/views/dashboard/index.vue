@@ -74,7 +74,7 @@ const chartRef = ref<HTMLElement | null>(null)
 
 const fetchData = async () => {
   try {
-    const res: any = await request.get('/bookmarks/analyze')
+    const res: any = await request.get('/BookMarks/analyze')
     // Ensure the response is handled depending on how Spring wrapper responds.
     if (res.code === 200 && res.data) {
        summary.value = res.data

@@ -10,7 +10,7 @@
       <el-upload
         class="upload-demo"
         drag
-        action="/api/bookMarks/uploadAndParseAuto"
+        action="/api/BookMarks/upload/auto"
         :on-success="handleSuccess"
         :on-error="handleError"
         :show-file-list="false"
