@@ -17,7 +17,6 @@
       :props="defaultProps"
       :filter-node-method="filterNode"
       node-key="id"
-      default-expand-all
       style="margin-top: 20px;"
       empty-text="暂无数据，请尝试通过后端接口加载"
     >
@@ -75,25 +74,41 @@ const fetchTreeData = async () => {
     const res: any = await request.get('/BookMarks/all')
     let list = res.data?.records || res.data || res || []
     if (!Array.isArray(list)) list = []
-    treeData.value = buildTree(list, null)
+    treeData.value = buildTreeFast(list)
   } catch (error) {
     console.error('获取树状数据失败', error)
   }
 }
 
-// Convert flat list with parentId to tree
-const buildTree = (list: any[], parentId: number | null | string): Tree[] => {
-  const currentLevelNodes = list
-      .filter((node) => Number(node.parentId) === Number(parentId) || (!node.parentId && (!parentId || parentId == 0)))
-      .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      
-  return currentLevelNodes.map((node) => {
-    const children = buildTree(list, node.id)
-    return {
-      ...node,
-      children: children.length > 0 ? children : undefined
+// Convert flat list to tree (O(N) Fast Algorithm)
+const buildTreeFast = (list: any[]): Tree[] => {
+  const map: Record<string, any> = {}
+  const roots: any[] = []
+
+  for (const node of list) {
+    map[node.id] = { ...node, children: [] }
+  }
+
+  for (const node of list) {
+    const parentId = node.parentId
+    // In database, parentId could be null or 0 for root
+    if (parentId && parentId !== '0' && parentId !== 0 && map[parentId]) {
+      map[parentId].children.push(map[node.id])
+    } else {
+      roots.push(map[node.id])
     }
-  })
+  }
+
+  const sortTree = (nodes: any[]) => {
+    nodes.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+    for (const n of nodes) {
+      if (n.children.length > 0) sortTree(n.children)
+      else delete n.children
+    }
+  }
+  
+  sortTree(roots)
+  return roots
 }
 
 onMounted(() => {

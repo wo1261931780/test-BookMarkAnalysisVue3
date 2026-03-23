@@ -27,6 +27,11 @@
         <template #title>资源管理器</template>
       </el-menu-item>
 
+      <el-menu-item index="/toolbox">
+        <el-icon><Tools /></el-icon>
+        <template #title>管家工具箱</template>
+      </el-menu-item>
+
       <el-menu-item index="/tree">
         <el-icon><Guide /></el-icon>
         <template #title>树状文件夹浏览</template>
@@ -48,6 +53,7 @@ import {
   DataBoard,
   Upload,
   Files,
+  Tools,
   Guide,
   List
 } from '@element-plus/icons-vue'

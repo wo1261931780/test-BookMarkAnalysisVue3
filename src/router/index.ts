@@ -27,6 +27,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '高级资源管理器' }
       },
       {
+        path: 'toolbox',
+        name: 'Toolbox',
+        component: () => import('@/views/toolbox/index.vue'),
+        meta: { title: '管家工具箱' }
+      },
+      {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index.vue'),
