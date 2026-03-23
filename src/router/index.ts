@@ -21,6 +21,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: '导入书签数据' }
       },
       {
+        path: 'manager',
+        name: 'Manager',
+        component: () => import('@/views/manager/index.vue'),
+        meta: { title: '高级资源管理器' }
+      },
+      {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index.vue'),
