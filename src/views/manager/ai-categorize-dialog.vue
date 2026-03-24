@@ -2,19 +2,19 @@
   <el-dialog v-model="dialogVisible" title="🤖 智能 AI 书签洗牌与重组引擎" width="85%" top="5vh" destroy-on-close>
     
     <div v-if="step === 1" class="step-container">
-      <el-alert v-if="isGlobalMode" title="🌐 全局无人值守模式已激活：一键整理全库 8000+ 书签！" type="warning" description="将启动全网大流转机制。系统会自发拆解成每次 50 个节点的小型列车发给 Gemini 推理，并将结果立即落盘生效！" show-icon style="margin-bottom: 20px" />
+      <el-alert v-if="isGlobalMode" title="🔥 全局知识拓扑大爆炸重建" type="error" description="此操作将：1.抹杀现存所有的旧分类目录 2.按域名聚类全站链结 3.将聚类浓缩体一次性下发给 Gemini 令其重新出架构图 4.瞬时在本地落地生成新树并重新分配所有子代。仅需消耗极少的 Token 即可重构百万资产！" show-icon style="margin-bottom: 20px" />
       <el-alert v-else title="请配置大语言模型 (LLM) 接入点" type="info" description="系统将把您选中的待分类书签和现有的所有目录名发送给大语言模型进行推理。API Key 仅保存在您的本地浏览器中。" show-icon style="margin-bottom: 20px" />
       
       <el-form :model="config" label-width="120px">
         <el-form-item label="API Base URL">
-          <el-input v-model="config.apiBaseUrl" placeholder="例如: https://generativelanguage.googleapis.com/v1beta" />
-          <div class="tip-text">支持 Google Gemini 官方骨干网地址以保障绝对的数据安全。</div>
+          <el-input v-model="config.apiBaseUrl" placeholder="例如: https://api.openai.com/v1 等 OpenAI 标准前缀" />
+          <div class="tip-text">支持搭载了 OpenAI 兼容规范的大模型通信。使用 Gemini 请附加 openai 路径：https://generativelanguage.googleapis.com/v1beta/openai/</div>
         </el-form-item>
         <el-form-item label="API Key">
           <el-input v-model="config.apiKey" type="password" show-password placeholder="AIzaSy..." />
         </el-form-item>
         <el-form-item label="Model ID">
-          <el-input v-model="config.modelName" placeholder="例如: gemini-1.5-pro, gemini-pro, gemini-1.0-pro" />
+          <el-input v-model="config.modelName" placeholder="例如: gemini-3-flash-preview, gpt-4o, claude-3-5-sonnet-20240620" />
         </el-form-item>
       </el-form>
       <div style="text-align: right; margin-top: 20px;">
@@ -67,24 +67,47 @@
       </div>
     </div>
 
-    <!-- 全局托管模式 Progress -->
+    <!-- 全局托管模式：每批次请求中 -->
     <div v-else-if="step === 4" class="step-container" style="text-align: center; padding: 50px 0;">
-      <el-progress type="dashboard" :percentage="progressPercent" :color="colors" />
-      <h3 style="margin-top: 20px;">🌐 正在全局委托 AI 大脑逐批处理书签...</h3>
-      <p style="color: #F56C6C; font-weight: bold">已处理: {{ processedCount }} / {{ totalCount }}</p>
-      <p style="color: #909399">数据拆分传输中，为了保障分类结构完整，在此期间请绝对不要关闭窗口/中断网络</p>
+      <el-icon class="is-loading" style="font-size: 50px; color: #409EFF"><Loading /></el-icon>
+      <h3 style="margin-top: 20px;">正在获取新一批的 AI 建议...</h3>
+      <p style="color: #909399">调用大模型接口中，请耐心等待返回...</p>
+    </div>
+
+    <!-- 全局托管模式：单批次审查 -->
+    <div v-else-if="step === 6" class="step-container">
+      <el-alert :title="`AI 分批处理中（当前进度：第 ${currentBatchIndex + 1} / ${totalBatches} 批）：请审查并确认此批网域的流向`" type="warning" show-icon style="margin-bottom: 15px" />
+      
+      <el-table :data="batchSuggestions" style="width: 100%" height="400">
+        <el-table-column prop="domain" label="核心网域 (Domain)" width="250" show-overflow-tooltip />
+        <el-table-column prop="count" label="涉及条数" width="100" />
+        <el-table-column prop="newFolderName" label="🎯 AI建议归属(可修改)" min-width="200">
+          <template #default="{ row }">
+            <el-input v-model="row.newFolderName" size="small" placeholder="修改后将在此文件夹落档" />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <el-button type="info" @click="fetchNextBatch" plain :loading="applying" style="float: left;">
+          不满意本批次，直接重连重抓 ↻
+        </el-button>
+        <el-button type="primary" @click="confirmBatchMapping" :loading="applying" size="large">
+          无误，立即覆盖数据库，抓取下一批 🚀
+        </el-button>
+      </div>
     </div>
 
     <!-- 全局托管模式 完成 -->
     <div v-else-if="step === 5" class="step-container" style="text-align: center; padding: 50px 0;">
-       <el-result icon="success" title="🎉 全局洗牌重构顺利收工" sub-title="您的千万级书签资产已全部得到 AI 指引并原地落位！" />
-       <el-button type="primary" size="large" @click="finishGlobal">立即见证奇迹 (刷新页面)</el-button>
+       <el-result icon="success" title="🎉 全网大一统重组宣告落幕" sub-title="您的千万书签已经被有条不紊地分配入了新落地的分类树中！" />
+       <el-button type="primary" size="large" @click="finishGlobal">立即检阅新帝国全线版图 (刷新页面)</el-button>
     </div>
   </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
@@ -100,22 +123,16 @@ const emit = defineEmits(['update:modelValue', 'applied'])
 const dialogVisible = ref(false)
 const step = ref(1)
 const applying = ref(false)
+const reportStats = ref<any>({})
 
-const processedCount = ref(0)
-const totalCount = ref(0)
-const progressPercent = computed(() => totalCount.value === 0 ? 0 : Math.round((processedCount.value / totalCount.value) * 100))
-const colors = [
-  { color: '#f56c6c', percentage: 20 },
-  { color: '#e6a23c', percentage: 40 },
-  { color: '#5cb87a', percentage: 60 },
-  { color: '#1989fa', percentage: 80 },
-  { color: '#6f7ad3', percentage: 100 },
-]
+const totalBatches = ref(0)
+const currentBatchIndex = ref(0)
+const batchSuggestions = ref<any[]>([])
 
 const config = ref({
-  apiBaseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+  apiBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai/',
   apiKey: '',
-  modelName: 'gemini-1.5-pro'
+  modelName: 'gemini-3-flash-preview'
 })
 
 const suggestions = ref<any[]>([])
@@ -162,16 +179,16 @@ const startAnalysis = async () => {
   // Cache to LocalStorage
   localStorage.setItem('bm_ai_config', JSON.stringify(config.value))
   
-  const linkIds = props.selectedBookmarks.filter(item => item.type !== 'h3').map(item => item.id)
-  if (linkIds.length === 0) {
-    ElMessage.error('没有可用书签实体供归类。')
-    return
-  }
-
   if (props.isGlobalMode) {
-    // ---- 启动全局极速批量委托引擎 ----
-    await processGlobalAuto(linkIds)
+    // ---- 启动大爆炸摧毁与重构引擎 ----
+    await processGlobalScorchedEarth()
   } else {
+    const linkIds = props.selectedBookmarks.filter(item => item.type !== 'h3').map(item => item.id)
+    if (linkIds.length === 0) {
+      ElMessage.error('没有可用部分书签供分析，请先在列表中勾选想要分类的具体链接。')
+      return
+    }
+
     // ---- 启动普通人工审查模式 ----
     step.value = 2
     try {
@@ -190,55 +207,66 @@ const startAnalysis = async () => {
   }
 }
 
-// Global Streaming AI Processor
-const processGlobalAuto = async (linkIds: any[]) => {
-  totalCount.value = linkIds.length
-  processedCount.value = 0
+// ---- 开始：全量托管人工审查流 ----
+const processGlobalScorchedEarth = async () => {
   step.value = 4
-
-  const BATCH_SIZE = 40 // 防止 Gemini Token Context Window 超限，每次只平送 40 组书签
-  
-  for (let i = 0; i < linkIds.length; i += BATCH_SIZE) {
-    const chunk = linkIds.slice(i, i + BATCH_SIZE)
+  try {
+    const initRes: any = await request.post('/BookMarks/toolbox/ai/reconstructTree/init')
+    if (initRes.code !== 20000) {
+      throw new Error(initRes.msg || '初始化大爆炸进程失败')
+    }
+    totalBatches.value = initRes.data.totalBatches
+    currentBatchIndex.value = initRes.data.currentBatchIndex
     
-    try {
-      const res: any = await request.post('/BookMarks/toolbox/ai/categorize', {
-        apiBaseUrl: config.value.apiBaseUrl,
-        apiKey: config.value.apiKey,
-        modelName: config.value.modelName,
-        bookmarkIds: chunk
-      })
-      
-      const batchSuggestions = res.data || []
-      for (const item of batchSuggestions) {
-         let runTargetId = item.recommendedParentId
-         
-         if (!runTargetId && item.recommendedParentName) {
-            const formData = new FormData()
-            formData.append('parentId', '0')
-            formData.append('folderName', item.recommendedParentName)
-            const folderRes: any = await request.post('/BookMarks/createFolder', formData)
-            runTargetId = folderRes.data.id
-         }
-         
-         if (runTargetId) {
-            const mf = new FormData()
-            mf.append('nodeId', String(item.bookmarkId))
-            mf.append('targetParentId', String(runTargetId))
-            mf.append('sortOrder', '0')
-            await request.post('/BookMarks/move', mf)
-         }
-      }
-    } catch (error) {
-       console.error(`Chunk ${i} Failed:`, error)
-       // LLM 往往存在幻觉导致个别 JSON 瘫痪抛出 500，此时必须放手让循环继续流转不能终止生命链路
+    await fetchNextBatch()
+  } catch (error: any) {
+    ElMessage.error('初始化失败: ' + (error.response?.data?.msg || error.message || error))
+    step.value = 1
+  }
+}
+
+const fetchNextBatch = async () => {
+  step.value = 4
+  try {
+    const res: any = await request.post('/BookMarks/toolbox/ai/reconstructTree/nextBatch', {
+      apiBaseUrl: config.value.apiBaseUrl,
+      apiKey: config.value.apiKey,
+      modelName: config.value.modelName
+    })
+    
+    if (res.code !== 20000) {
+        throw new Error(res.msg || '获取批次折戟')
     }
     
-    // 更新实弹处理战报百分比
-    processedCount.value += chunk.length
+    batchSuggestions.value = res.data || []
+    step.value = 6
+  } catch (error: any) {
+    ElMessage.error('获取此批次 AI 建议时遇到了网络阻断或限流，您可以调整后直接再次点击重抓: ' + (error.response?.data?.msg || error.message || error))
+    step.value = 6 
   }
-  
-  step.value = 5
+}
+
+const confirmBatchMapping = async () => {
+  applying.value = true
+  try {
+    const res: any = await request.post('/BookMarks/toolbox/ai/reconstructTree/confirmBatch', batchSuggestions.value)
+    if (res.code !== 20000) {
+      throw new Error(res.msg || '保存库变失败')
+    }
+    
+    currentBatchIndex.value = res.data.currentBatchIndex
+    
+    if (currentBatchIndex.value >= totalBatches.value) {
+       step.value = 5
+       ElMessage.success('全网结构重组落幕！')
+    } else {
+       await fetchNextBatch()
+    }
+  } catch (error: any) {
+    ElMessage.error('本批次未能落实到数据库: ' + (error.response?.data?.msg || error.message || error))
+  } finally {
+    applying.value = false
+  }
 }
 
 const finishGlobal = () => {
