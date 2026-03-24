@@ -111,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed, nextTick } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { Folder, Link, FolderAdd, EditPen, Delete } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 import { ElTree, ElMessage, ElMessageBox } from 'element-plus'
@@ -191,7 +191,7 @@ const fetchData = async () => {
     if (!Array.isArray(list)) list = []
     
     allData.value = list
-    const foldersOnly = list.filter(item => item.type === 'h3')
+    const foldersOnly = list.filter((item: any) => item.type === 'h3')
     folderTree.value = buildTreeFast(foldersOnly)
   } catch (err) {
     console.error(err)
@@ -271,13 +271,13 @@ const handleRowDblClick = (row: BookmarkNode) => {
 }
 
 // ---------------- Drag and Drop API ----------------
-const allowDrop = (draggingNode: any, dropNode: any, type: string) => {
+const allowDrop = (_draggingNode: any, _dropNode: any, _type: string) => {
   // Only allow dropping "into" a folder, not "before" or "after" if it breaks structural pureness, 
   // but let's allow "inner", "prev", "next" generally on tree since tree is all folders
   return true
 }
 
-const handleDrop = async (draggingNode: any, dropNode: any, dropType: string, ev: any) => {
+const handleDrop = async (draggingNode: any, dropNode: any, dropType: string, _ev: any) => {
   const draggedId = draggingNode.data.id
   let targetParentId = null
   let sortOrder = draggingNode.data.sortOrder || 0
@@ -303,7 +303,7 @@ const handleDrop = async (draggingNode: any, dropNode: any, dropType: string, ev
   }
 }
 
-const handleContextMenu = (e: Event, data: BookmarkNode, node: any, nodeInstance: any) => {
+const handleContextMenu = (e: Event, data: BookmarkNode, _node: any, _nodeInstance: any) => {
   e.preventDefault()
   const mouseEvent = e as MouseEvent
   contextMenuX.value = mouseEvent.clientX
@@ -395,7 +395,9 @@ const handleBatchDelete = () => {
   }).catch(() => {})
 }
 
-function formatTime(timestamp: number | null) {
+// formatTime is kept here for potential future use in the template
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _formatTime(timestamp: number | null) {
   if (!timestamp) return '-'
   return new Date(timestamp * 1000).toLocaleString()
 }

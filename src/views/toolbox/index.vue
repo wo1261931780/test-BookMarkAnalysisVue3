@@ -243,13 +243,13 @@ const confirmAction = (type: string) => {
 const executeToolboxAction = async (type: string) => {
   try {
     if (type === 'dedupe') {
-      const res: any = await request.post('/BookMarks/toolbox/deduplicate')
+      await request.post('/BookMarks/toolbox/deduplicate')
       ElMessage.success('去重执行完毕！本次清理了大量空间！')
     } else if (type === 'emptyFolders') {
-      const res: any = await request.post('/BookMarks/toolbox/clearEmptyFolders')
+      await request.post('/BookMarks/toolbox/clearEmptyFolders')
       ElMessage.success('空壳目录清扫完成！')
     } else if (type === 'reset') {
-      const res: any = await request.post('/BookMarks/toolbox/reset')
+      await request.post('/BookMarks/toolbox/reset')
       ElMessage.success('格式化完成！数据库现在是一张白纸了。')
     } else if (type === 'export') {
       ElMessage.info('准备导出书签，请稍后...')

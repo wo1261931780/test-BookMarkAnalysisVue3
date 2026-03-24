@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
@@ -123,7 +123,7 @@ const emit = defineEmits(['update:modelValue', 'applied'])
 const dialogVisible = ref(false)
 const step = ref(1)
 const applying = ref(false)
-const reportStats = ref<any>({})
+
 
 const totalBatches = ref(0)
 const currentBatchIndex = ref(0)
